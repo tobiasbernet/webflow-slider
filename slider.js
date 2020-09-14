@@ -28,39 +28,47 @@ function debounce(func, wait, immediate) {
 }
 
 var onScroll = debounce(function(direction) {
-  console.log(direction);
   if (direction == false) {
     $("#slider-arrow-right").trigger('tap');
   } else {
     $("#slider-arrow-left").trigger('tap');
   }
-}, 200, true);
+}, 100, true);
 
-$('#sliderblock').bind('wheel mousewheel', function(e) {
-  e.preventDefault();
-  var delta;
-  if (typeof event != 'undefined' && event.wheelDelta) {
-    delta = event.wheelDelta;
-  } else {
-    delta = -1 * e.originalEvent.deltaY;
-  }
-
+$('.collection-list-wrapper').bind('wheel', function(e) {
   var navSlider = document.querySelector('.slide-nav-2');
   var last = navSlider.children.length - 1;
-  if ($('.w-active').index() == last) {
-    if (delta >= 0) {
-      $(navSlider.children[last - 1]).trigger('tap');
-      delta = -1;
-    } else {
-      return;
-    }
-  } else if ($('.w-active').index() == 0) {
-    if (delta <= 0) {
-      $(navSlider.children[1]).trigger('tap');
-      delta = 0;
-    } else {
-      return;
-    }
+
+  e.preventDefault();
+  deltaY = event.deltaY;
+  deltaX = event.deltaX;
+  delta = e.originalEvent.wheelDelta;
+  offsetPlus = 30; // offset => do not react to short touchs
+  offsetMinus = -30;
+  tapDirection = null; // 0 == right, 1 == left, null == undefined
+
+  // Detect direction and do some buffering
+  if ((delta <= offsetMinus && deltaY <= 0 && deltaX >= 0)) {
+    tapDirection = 1
+  } else if (delta >= offsetPlus && deltaX <= 0) {
+    tapDirection = 0
+  } else if (delta <= offsetMinus && deltaY >= 0 && deltaX >= 0) {
+    tapDirection = 1
   }
-  onScroll(delta >= 0);
+
+  // tap left
+  if (tapDirection === 1) {
+    // Don't tap left on the last element
+    if ($('.w-active').index() === 0) {
+      return;
+    }
+    onScroll(true);
+  // tap right
+  } else if (tapDirection === 0) {
+    // Don't tap right on the last element
+    if ($('.w-active').index() === last) {
+      return;
+    }
+    onScroll(false);
+  }
 });
