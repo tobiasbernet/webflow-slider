@@ -70,7 +70,9 @@ function tap(direction) {
   } else {
     $("#slider-arrow-left").trigger('tap');
   }
-  setTimeout(function(){ hideHrefOnInactiveSlides(); }, slideroffsetTime);
+  setTimeout(function() {
+    hideHrefOnInactiveSlides();
+  }, slideroffsetTime);
 }
 
 init();
@@ -79,8 +81,20 @@ var onScroll = debounce(function(direction) {
   tap(direction);
 }, slideroffsetTime, true);
 
-$( "a.w-inline-block" ).bind( "click", function(e) {
-  clickedIndex = $( this ).attr("data-slider-index");
+$("#slider-arrow-right").bind("click", function() {
+  setTimeout(function() {
+    hideHrefOnInactiveSlides();
+  }, slideroffsetTime);
+});
+
+$("#slider-arrow-left").bind("click", function() {
+  setTimeout(function() {
+    hideHrefOnInactiveSlides();
+  }, slideroffsetTime);
+});
+
+$("a.w-inline-block").bind("click", function() {
+  clickedIndex = $(this).attr("data-slider-index");
   activeIndex = $('.w-active').index();
   if (clickedIndex) {
     if (clickedIndex > activeIndex) {
