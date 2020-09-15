@@ -11,6 +11,43 @@ Webflow.push(function() {
     });
 });
 
+var slideroffsetTime = 100;
+
+function addDataHrefAttr() {
+  var navSliderMask = document.querySelector('.w-slider-mask');
+  var navSliderChildrens = navSliderMask.children;
+  for (i = 0; i < navSliderChildrens.length; i++) {
+    navElement = navSliderChildrens[i];
+    linkElement = $(navElement).find("a");
+    if (linkElement) {
+      linkElement.attr("data-link", linkElement.attr('href'));
+      linkElement.attr("data-slider-index", i);
+    }
+  }
+};
+
+function hideHrefOnInactiveSlides() {
+  console.log("hide");
+  var navSliderMask = document.querySelector('.w-slider-mask');
+  var navSliderChildrens = navSliderMask.children;
+  for (i = 0; i < navSliderChildrens.length; i++) {
+    navElement = navSliderChildrens[i];
+    linkElement = $(navElement).find("a");
+    if (navElement.hasAttribute('aria-hidden') && $(navElement).hasClass('w-slide')) {
+      linkElement.attr("aria-disabled", true);
+      linkElement.removeAttr("href");
+    } else if ($(navElement).hasClass('w-slide') && !navElement.hasAttribute('aria-hidden')) {
+      linkElement.removeAttr("aria-disabled");
+      linkElement.attr("href", linkElement.attr('data-link'));
+    }
+  }
+};
+
+function init() {
+  addDataHrefAttr();
+  hideHrefOnInactiveSlides();
+}
+
 function debounce(func, wait, immediate) {
   var timeout;
   return function() {
@@ -27,13 +64,34 @@ function debounce(func, wait, immediate) {
   };
 }
 
-var onScroll = debounce(function(direction) {
+function tap(direction) {
   if (direction == false) {
     $("#slider-arrow-right").trigger('tap');
   } else {
     $("#slider-arrow-left").trigger('tap');
   }
-}, 100, true);
+  setTimeout(function(){ hideHrefOnInactiveSlides(); }, slideroffsetTime);
+}
+
+init();
+
+var onScroll = debounce(function(direction) {
+  tap(direction);
+}, slideroffsetTime, true);
+
+$( "a.w-inline-block" ).bind( "click", function(e) {
+  clickedIndex = $( this ).attr("data-slider-index");
+  activeIndex = $('.w-active').index();
+  if (clickedIndex) {
+    if (clickedIndex > activeIndex) {
+      // Go right
+      tap(false);
+    } else if (clickedIndex < activeIndex) {
+      // Go left
+      tap(true);
+    }
+  }
+});
 
 $('.collection-list-wrapper').bind('wheel', function(e) {
   var navSlider = document.querySelector('.slide-nav-2');
@@ -58,12 +116,12 @@ $('.collection-list-wrapper').bind('wheel', function(e) {
 
   // tap left
   if (tapDirection === 1) {
-    // Don't tap left on the last element
+    // Don't tap left on the first element
     if ($('.w-active').index() === 0) {
       return;
     }
     onScroll(true);
-  // tap right
+    // tap right
   } else if (tapDirection === 0) {
     // Don't tap right on the last element
     if ($('.w-active').index() === last) {
