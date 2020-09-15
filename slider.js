@@ -49,11 +49,11 @@ $('.collection-list-wrapper').bind('wheel', function(e) {
 
   // Detect direction and do some buffering
   if ((delta <= offsetMinus && deltaY <= 0 && deltaX >= 0)) {
-    tapDirection = 1
-  } else if (delta >= offsetPlus && deltaX <= 0) {
     tapDirection = 0
-  } else if (delta <= offsetMinus && deltaY >= 0 && deltaX >= 0) {
+  } else if (delta >= offsetPlus && deltaX <= 0) {
     tapDirection = 1
+  } else if (delta <= offsetMinus && deltaY >= 0 && deltaX >= 0) {
+    tapDirection = 0
   }
 
   // tap left
